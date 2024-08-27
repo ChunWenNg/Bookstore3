@@ -25,7 +25,6 @@ import androidx.navigation.NavController
 import com.example.bookstore3.data.createBook
 import com.example.bookstore3.data.books
 import com.example.bookstore3.data.uploadImage
-import com.example.bookstore3.data.getImageUrl
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date

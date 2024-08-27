@@ -10,12 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -23,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import coil.compose.rememberAsyncImagePainter
 import com.example.bookstore3.data.books
 import com.example.bookstore3.data.readBook
-import com.example.bookstore3.data.getImageUrl
 import com.example.bookstore3.data.supabase
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.launch
@@ -32,7 +29,6 @@ import kotlin.time.Duration.Companion.minutes
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BookDetailsScreen(navController: NavController, bookId: String?) {
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var book by remember { mutableStateOf<books?>(null) }
     var imageUrl by remember { mutableStateOf("") }

@@ -129,7 +129,7 @@ fun BookListingScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(bookList) { book ->
-                        BookItem(book = book, navController = navController, bookList = bookList) { updatedList ->
+                        BookItem(book = book, navController = navController) { updatedList ->
                             bookList = updatedList
                         }
                     }
@@ -141,7 +141,7 @@ fun BookListingScreen(navController: NavController) {
 
 @OptIn(ExperimentalWearMaterialApi::class)
 @Composable
-fun BookItem(book: books, navController: NavController, bookList: List<books>, onBookListUpdated: (List<books>) -> Unit) {
+fun BookItem(book: books, navController: NavController, onBookListUpdated: (List<books>) -> Unit) {
     val swipeableState = rememberSwipeableState(0)
     val coroutineScope = rememberCoroutineScope()
     var imageUrlResult by remember { mutableStateOf("") }

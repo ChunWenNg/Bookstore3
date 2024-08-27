@@ -10,9 +10,7 @@ import com.example.bookstore3.ui.theme.Bookstore3Theme
 import com.example.bookstore3.navigation.Navigation
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.gotrue.signInAnonymously
 import androidx.lifecycle.lifecycleScope
-import io.github.jan.supabase.gotrue.providers.builtin.OTP
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import kotlinx.coroutines.launch

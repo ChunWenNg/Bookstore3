@@ -1,6 +1,7 @@
+@file:Suppress("NAME_SHADOWING")
+
 package com.example.bookstore3.screens
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -18,13 +18,11 @@ import com.example.bookstore3.data.books
 import com.example.bookstore3.data.updateBook
 import com.example.bookstore3.data.readBook
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextField
@@ -34,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditBookScreen(navController: NavController, bookId: String?) {
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var book by remember { mutableStateOf<books?>(null) }
     var bookTitle by remember { mutableStateOf(TextFieldValue()) }
