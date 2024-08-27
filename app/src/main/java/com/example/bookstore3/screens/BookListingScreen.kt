@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.graphics.RectangleShape
@@ -30,11 +31,19 @@ import androidx.compose.material3.Button
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
+import coil.compose.rememberAsyncImagePainter
 import com.example.bookstore3.data.deleteBook
+import com.example.bookstore3.data.getImageUrl
+import com.example.bookstore3.data.supabase
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.result.PostgrestResult
+import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -131,20 +140,14 @@ fun BookListingScreen(navController: NavController) {
 @Composable
 fun BookItem(book: books, navController: NavController, bookList: List<books>, onBookListUpdated: (List<books>) -> Unit) {
     val swipeableState = rememberSwipeableState(0)
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var imageUrl by remember { mutableStateOf("") }
+    var imageUrlResult by remember { mutableStateOf("") }
 
-//    LaunchedEffect(book.bookImage) {
-//        coroutineScope.launch {
-//            val signedUrls = getImageUrl("bookImage", book.bookImage)
-//            if (signedUrls.isNotEmpty()) {
-//                imageUrl = signedUrls.first()
-//            } else {
-//                imageUrl = "https://via.placeholder.com/150" // Fallback URL if no image is available
-//            }
-//        }
-//    }
+    LaunchedEffect(book.bookImage) {
+        coroutineScope.launch {
+            val imageUrlResult = getNewImageUrl(id = book.id)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -199,15 +202,15 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
                     .padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                // Uncomment when you have the image part ready
-                // Image(
-                //     painter = rememberAsyncImagePainter(imageUrl),
-                //     contentDescription = null,
-                //     modifier = Modifier.size(80.dp),
-                //     contentScale = ContentScale.Crop
-                // )
-                //
-                // Spacer(modifier = Modifier.width(16.dp))
+
+                 Image(
+                     painter = rememberAsyncImagePainter(imageUrlResult),
+                     contentDescription = null,
+                     modifier = Modifier.size(80.dp),
+                     contentScale = ContentScale.Crop
+                 )
+
+                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
                     text = book.bookTitle,
@@ -231,4 +234,23 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
             }
         }
     }
+}
+
+@Serializable
+data class BookImage(
+    val bookImage: String?
+)
+
+
+suspend fun getNewImageUrl(id: String): String? {
+    val response = supabase
+        .from("books")
+        .select(columns = Columns.list("bookImage")) {
+            filter {
+                eq("id", id) // Correctly filter where the id column matches the provided id
+            }
+        }
+        .decodeSingle<BookImage>()
+
+    return response.bookImage
 }

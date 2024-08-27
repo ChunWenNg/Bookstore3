@@ -48,11 +48,11 @@ fun BookDetailsScreen(navController: NavController, bookId: String?) {
                 // Fetch the book details from the database
                 val bookId = it
                 book = readBook().find { it.id == bookId }
-                // Fetch the book image URL
-//                book?.let { selectedBook ->
-//                    val urls = getImageUrl("bookImage", selectedBook.bookImage)
-//                    imageUrl = urls.firstOrNull() ?: ""
-//                }
+                //Fetch the book image URL
+                book?.let { selectedBook ->
+                    val urls = getImageUrl("bookImage", selectedBook.bookImage)
+                    imageUrl = urls.firstOrNull() ?: ""
+                }
             }
         }
     }

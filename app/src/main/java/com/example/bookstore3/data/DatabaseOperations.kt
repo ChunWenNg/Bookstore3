@@ -50,10 +50,6 @@ data class books(
     val bookImage: String,
 )
 
-@Serializable
-data class SignedUrl(
-    val signedURL: String? = "" // Default to empty string if null
-)
 
 
 // CRUD Operations for Books
