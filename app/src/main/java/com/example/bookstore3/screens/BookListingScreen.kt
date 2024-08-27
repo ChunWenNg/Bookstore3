@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -60,7 +62,8 @@ fun BookListingScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             // Fetch all books from the database
-            bookList = readBook()
+            val fetchedBooks = readBook()
+            bookList = fetchedBooks.sortedByDescending { it.date }
         }
     }
 
@@ -122,10 +125,10 @@ fun BookListingScreen(navController: NavController) {
                     style = MaterialTheme.typography.bodyLarge.copy(color = Color.LightGray)
                 )
             } else {
-                Column(
+                LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    bookList.forEach { book ->
+                    items(bookList) { book ->
                         BookItem(book = book, navController = navController, bookList = bookList) { updatedList ->
                             bookList = updatedList
                         }
@@ -199,13 +202,14 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
                 }
             }
 
+            Spacer(modifier = Modifier.width(16.dp))
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-
                 if (imageUrlResult.isNotEmpty()) {
                     Image(
                         painter = rememberAsyncImagePainter(imageUrlResult),
@@ -249,12 +253,10 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
     }
 }
 
-
 @Serializable
 data class BookImage(
     val bookImage: String?
 )
-
 
 suspend fun getNewImageUrl(id: String): String? {
     val response = supabase

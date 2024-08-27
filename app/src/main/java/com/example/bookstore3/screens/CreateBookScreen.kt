@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.bookstore3.screens
 
 import android.graphics.Bitmap
@@ -73,7 +75,9 @@ fun ImageBox(
     ) {
         if (bookImageUri != null) {
             val imageBitmap: ImageBitmap =
-                ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, bookImageUri!!))
+                ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver,
+                    bookImageUri
+                ))
                     .asImageBitmap()
             Image(
                 bitmap = imageBitmap,
@@ -197,7 +201,6 @@ fun CreateBookScreen(navController: NavController) {
                                             uploadImage(inputStream, fileName)
 
                                             // Get image URL
-                                            val imageUrl = getImageUrl("bookImage", fileName).firstOrNull()
 
                                             // Get the next book ID
                                             val newBookId = (getBookId() as? Int) ?: 0
@@ -246,7 +249,6 @@ fun CreateBookScreen(navController: NavController) {
                                         uploadImage(inputStream, fileName)
 
                                         // Get image URL
-                                        val imageUrl = getImageUrl("bookImage", fileName).firstOrNull()
                                         // Get the next book ID
                                         val newBookId = (getBookId() as? Int) ?: 0
 
@@ -257,7 +259,7 @@ fun CreateBookScreen(navController: NavController) {
                                             bookAuthor = bookAuthor,
                                             bookDesc = bookDescription,
                                             date = creationDate,
-                                            bookImage = fileName ?: ""
+                                            bookImage = fileName
                                         )
 
                                         createBook(newBook)
