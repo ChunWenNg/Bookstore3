@@ -5,7 +5,6 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Count
-import io.github.jan.supabase.storage.SignedUrl
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.storage
 import io.ktor.client.HttpClient
@@ -86,7 +85,7 @@ suspend fun updateBook(id: String, title: String, author: String, desc: String) 
 }
 
 
-suspend fun deleteBook(id: Int) {
+suspend fun deleteBook(id: String) {
     withContext(Dispatchers.IO) {
         supabase
             .from("books")

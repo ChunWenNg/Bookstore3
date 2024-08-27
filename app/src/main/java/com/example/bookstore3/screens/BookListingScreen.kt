@@ -1,6 +1,5 @@
 package com.example.bookstore3.screens
 
-import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -39,11 +38,9 @@ import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import coil.compose.rememberAsyncImagePainter
 import com.example.bookstore3.data.deleteBook
-import com.example.bookstore3.data.getImageUrl
 import com.example.bookstore3.data.supabase
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.result.PostgrestResult
 import io.github.jan.supabase.storage.storage
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
@@ -189,7 +186,9 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            deleteBook(book.id.toInt())
+                            deleteBook(book.id)
+                            val bucket = supabase.storage.from("bookImage")
+                            bucket.delete(imageUrlResult)
                             val updatedList = readBook()
                             onBookListUpdated(updatedList)
                         }
