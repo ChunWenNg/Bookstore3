@@ -43,6 +43,168 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import com.example.bookstore3.data.getBookId
 
+
+//@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+//@Composable
+//fun CreateBookScreen(navController: NavController) {
+//    var bookImageUri by remember { mutableStateOf<Uri?>(null) }
+//    var bookName by remember { mutableStateOf("") }
+//    var bookAuthor by remember { mutableStateOf("") }
+//    var bookDescription by remember { mutableStateOf("") }
+//    val context = LocalContext.current
+//    val scrollState = rememberScrollState()
+//    val creationDate = remember { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()) }
+//
+//    // Image picker and camera launchers
+//    val imagePickerLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.GetContent()
+//    ) { uri: Uri? -> bookImageUri = uri }
+//
+//    val cameraLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.TakePicturePreview()
+//    ) { bitmap ->
+//        bitmap?.let {
+//            val uri = Uri.parse(MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, null, null))
+//            bookImageUri = uri
+//        }
+//    }
+//
+//    Column(modifier = Modifier.fillMaxSize()) {
+//        TopAppBar(
+//            title = { Text("Create a New Book", color = Color.White) },
+//            actions = {
+//                IconButton(onClick = { navController.popBackStack() }) {
+//                    Icon(
+//                        painter = painterResource(id = android.R.drawable.ic_menu_revert),
+//                        contentDescription = "Back",
+//                        tint = Color.White
+//                    )
+//                }
+//            },
+//            colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = Color(0xFF0D47A1))
+//        )
+//
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .background(
+//                    Brush.linearGradient(
+//                        colors = listOf(Color(0xFF0D47A1), Color(0xFF42A5F5)),
+//                        start = Offset.Infinite,
+//                        end = Offset.Zero
+//                    )
+//                )
+//                .padding(16.dp)
+//                .verticalScroll(scrollState)
+//        ) {
+//            Column(modifier = Modifier.fillMaxSize()) {
+//
+//                // Inline ImageBox Composable Code
+//                val context = LocalContext.current
+//
+//                Box(
+//                    modifier = Modifier
+//                        .size(150.dp)
+//                        .background(Color.Gray)
+//                        .clickable {
+//                            val options = arrayOf("Photo Library", "Take a Picture", "Cancel")
+//                            val builder = android.app.AlertDialog.Builder(context)
+//                            builder.setTitle("Select an Option")
+//                            builder.setItems(options) { dialog, which ->
+//                                when (which) {
+//                                    0 -> imagePickerLauncher.launch("image/*")
+//                                    1 -> cameraLauncher.launch()
+//                                    2 -> dialog.dismiss()
+//                                }
+//                            }
+//                            builder.show()
+//                        },
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    if (bookImageUri != null) {
+//                        val imageBitmap: ImageBitmap =
+//                            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, bookImageUri!!)).asImageBitmap()
+//                        Image(
+//                            bitmap = imageBitmap,
+//                            contentDescription = "Book Image",
+//                            contentScale = ContentScale.Crop,
+//                            modifier = Modifier.fillMaxSize()
+//                        )
+//                    } else {
+//                        Text(text = "Tap to add image", color = Color.White)
+//                    }
+//                }
+//
+//                Spacer(modifier = Modifier.height(16.dp))
+//
+//                TextField(
+//                    value = bookName,
+//                    onValueChange = { bookName = it },
+//                    label = { Text("Book Name", color = Color.White) },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//
+//                Spacer(modifier = Modifier.height(16.dp))
+//
+//                TextField(
+//                    value = bookAuthor,
+//                    onValueChange = { bookAuthor = it },
+//                    label = { Text("Author", color = Color.White) },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//
+//                Spacer(modifier = Modifier.height(16.dp))
+//
+//                TextField(
+//                    value = bookDescription,
+//                    onValueChange = { bookDescription = it },
+//                    label = { Text("Description", color = Color.White) },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//
+//                Spacer(modifier = Modifier.height(24.dp))
+//
+//                Button(
+//                    onClick = {
+//                        // Launch a coroutine to handle image upload and book creation
+//                        LaunchedEffect(bookImageUri) {
+//                            if (bookImageUri != null) {
+//                                // Upload image
+//                                val fileName = "book_${System.currentTimeMillis()}"
+//                                val imageFile = File(bookImageUri!!.path!!)
+//                                uploadImage(imageFile, fileName)
+//
+//                                // Get image URL
+//                                val imageUrl = getImageUrl("bookImage", fileName)
+//
+//                                // Create the new book entry
+//                                val newBook = books(
+//                                    id = 0, // Placeholder
+//                                    bookTitle = bookName,
+//                                    bookAuthor = bookAuthor,
+//                                    bookDesc = bookDescription,
+//                                    date = creationDate,
+//                                    bookImage = imageUrl.first().signedURL
+//                                )
+//
+//                                createBook(newBook)
+//                                Toast.makeText(context, "Book Created", Toast.LENGTH_SHORT).show()
+//                                navController.navigate("book_list")
+//                            } else {
+//                                Toast.makeText(context, "Please select an image", Toast.LENGTH_SHORT).show()
+//                            }
+//                        }
+//                    },
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text("Save Book")
+//                }
+//            }
+//        }
+//    }
+//}
+
+
 @Composable
 fun ImageBox(
     bookImageUri: Uri?,
@@ -208,7 +370,7 @@ fun CreateBookScreen(navController: NavController) {
                                                 bookAuthor = bookAuthor,
                                                 bookDesc = bookDescription,
                                                 date = creationDate,
-                                                bookImage = imageUrl ?: ""
+                                                bookImage = fileName
                                             )
 
                                             createBook(newBook)
@@ -256,7 +418,7 @@ fun CreateBookScreen(navController: NavController) {
                                             bookAuthor = bookAuthor,
                                             bookDesc = bookDescription,
                                             date = creationDate,
-                                            bookImage = imageUrl ?: ""
+                                            bookImage = fileName ?: ""
                                         )
 
                                         createBook(newBook)

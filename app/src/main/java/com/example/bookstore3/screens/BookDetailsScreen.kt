@@ -1,6 +1,6 @@
 package com.example.bookstore3.screens
 
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,20 +14,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
-import com.example.bookstore3.data.books
-import com.example.bookstore3.data.readBook
-import com.example.bookstore3.data.getImageUrl
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import coil.compose.rememberAsyncImagePainter
+import com.example.bookstore3.data.books
+import com.example.bookstore3.data.readBook
+import com.example.bookstore3.data.getImageUrl
+import com.example.bookstore3.data.supabase
+import io.github.jan.supabase.storage.storage
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -42,17 +42,25 @@ fun BookDetailsScreen(navController: NavController, bookId: String?) {
         navController.popBackStack()
     }
 
+    // Fetch book details based on bookId
     LaunchedEffect(bookId) {
         coroutineScope.launch {
-            bookId?.let {
-                // Fetch the book details from the database
-                val bookId = it
-                book = readBook().find { it.id == bookId }
-                //Fetch the book image URL
-                book?.let { selectedBook ->
-                    val urls = getImageUrl("bookImage", selectedBook.bookImage)
-                    imageUrl = urls.firstOrNull() ?: ""
-                }
+            book = bookId?.let { id ->
+                readBook().firstOrNull { it.id == id }
+            }
+        }
+    }
+
+
+    // Fetch image URL after book is fetched
+    LaunchedEffect(book?.bookImage) {
+        coroutineScope.launch {
+            book?.let {
+                val fileName = getNewImageUrl(id = it.id)
+                val bucket = supabase.storage.from("bookImage")
+                val url = fileName?.let { bucket.createSignedUrl(path = it, expiresIn = 3.minutes) }
+                Log.d("Image URL", "Fetched URL: $url")
+                imageUrl = url ?: ""
             }
         }
     }
@@ -105,17 +113,17 @@ fun BookDetailsScreen(navController: NavController, bookId: String?) {
                     }
                 }
 
-                // Display the book image
-//                Image(
-//                    painter = rememberAsyncImagePainter(imageUrl),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .size(150.dp)
-//                        .align(Alignment.CenterHorizontally),
-//                    contentScale = ContentScale.Crop
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
+                // Display the image
+                Image(
+                    painter = rememberAsyncImagePainter(imageUrl),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .align(Alignment.CenterHorizontally),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = selectedBook.bookTitle,
@@ -157,3 +165,4 @@ fun BookDetailsScreen(navController: NavController, bookId: String?) {
         }
     }
 }
+

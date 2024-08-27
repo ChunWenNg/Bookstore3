@@ -1,6 +1,7 @@
 package com.example.bookstore3.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -43,7 +44,9 @@ import com.example.bookstore3.data.supabase
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.result.PostgrestResult
+import io.github.jan.supabase.storage.storage
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -145,7 +148,11 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
 
     LaunchedEffect(book.bookImage) {
         coroutineScope.launch {
-            val imageUrlResult = getNewImageUrl(id = book.id)
+            val fileName = getNewImageUrl(id = book.id)
+            val bucket = supabase.storage.from("bookImage")
+            val url = fileName?.let { bucket.createSignedUrl(path = it, expiresIn = 3.minutes) }
+            Log.d("Image URL", "Fetched URL: $url")
+            imageUrlResult = url ?: ""  // Correctly update imageUrlResult
         }
     }
 
@@ -153,21 +160,21 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .background(Color.Transparent) // Set background to transparent
+            .background(Color.Transparent)
             .border(
                 width = 1.dp,
-                color = Color.Black.copy(alpha = 0.5f), // Transparent border color
+                color = Color.Black.copy(alpha = 0.5f),
                 shape = RectangleShape
             )
             .padding(8.dp)
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
-                    navController.navigate("book_details/${book.id}") // Navigate to BookDetailsScreen
+                    navController.navigate("book_details/${book.id}")
                 }
             }
             .swipeable(
                 state = swipeableState,
-                anchors = mapOf(0f to 0, 1f to 1), // Define anchors for swipe positions
+                anchors = mapOf(0f to 0, 1f to 1),
                 thresholds = { _, _ -> FractionalThreshold(0.5f) },
                 orientation = Orientation.Horizontal
             )
@@ -178,13 +185,11 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
                 .padding(horizontal = 8.dp)
                 .align(Alignment.CenterStart)
         ) {
-            // Swipe-to-delete button
             if (swipeableState.offset.value > 0) {
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            deleteBook(book.id.toInt()) // Call delete function
-                            // Refresh the book list
+                            deleteBook(book.id.toInt())
                             val updatedList = readBook()
                             onBookListUpdated(updatedList)
                         }
@@ -195,7 +200,6 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
                 }
             }
 
-            // Book item content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -203,14 +207,24 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
                 verticalArrangement = Arrangement.Center
             ) {
 
-                 Image(
-                     painter = rememberAsyncImagePainter(imageUrlResult),
-                     contentDescription = null,
-                     modifier = Modifier.size(80.dp),
-                     contentScale = ContentScale.Crop
-                 )
+                if (imageUrlResult.isNotEmpty()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUrlResult),
+                        contentDescription = null,
+                        modifier = Modifier.size(80.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    // Placeholder or default image if the URL is empty
+                    Image(
+                        painter = rememberAsyncImagePainter("https://via.placeholder.com/80"), // You can replace this with a real placeholder URL
+                        contentDescription = "Default Image",
+                        modifier = Modifier.size(80.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
-                 Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
                     text = book.bookTitle,
@@ -235,6 +249,7 @@ fun BookItem(book: books, navController: NavController, bookList: List<books>, o
         }
     }
 }
+
 
 @Serializable
 data class BookImage(
