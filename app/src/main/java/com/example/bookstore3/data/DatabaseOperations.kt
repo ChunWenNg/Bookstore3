@@ -136,7 +136,7 @@ suspend fun deleteImage(fileName: String) {
 suspend fun getImageUrl(bucketName: String, fileName: String): List<String> {
     return withContext(Dispatchers.IO) {
         val urls = supabase.storage.from(bucketName).createSignedUrls(20.minutes, fileName)
-        urls.map { it.signedURL ?: "" } // Replace null with an empty string
+        urls.map { it.signedURL } // Replace null with an empty string
     }
 }
 
@@ -147,5 +147,5 @@ suspend fun getBookId(): Any {
             count(Count.EXACT)
         }
 
-    return count ?: -1
+    return count
 }
