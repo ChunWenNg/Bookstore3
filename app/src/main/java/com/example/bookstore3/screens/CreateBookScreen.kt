@@ -2,6 +2,7 @@
 
 package com.example.bookstore3.screens
 
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.core.content.ContextCompat
 import com.example.bookstore3.data.getBookId
 
 
@@ -49,7 +51,8 @@ import com.example.bookstore3.data.getBookId
 fun ImageBox(
     bookImageUri: Uri?,
     imagePickerLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    cameraLauncher: ManagedActivityResultLauncher<Void?, Bitmap?>
+    cameraLauncher: ManagedActivityResultLauncher<Void?, Bitmap?>,
+    requestCameraPermissionLauncher: ManagedActivityResultLauncher<String, Boolean>
 ) {
     val context = LocalContext.current
 
@@ -64,7 +67,13 @@ fun ImageBox(
                 builder.setItems(options) { dialog, which ->
                     when (which) {
                         0 -> imagePickerLauncher.launch("image/*")
-                        1 -> cameraLauncher.launch()
+                        1 -> {
+                            if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                cameraLauncher.launch()
+                            } else {
+                                requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            }
+                        }
                         2 -> dialog.dismiss()
                     }
                 }
@@ -90,6 +99,7 @@ fun ImageBox(
     }
 }
 
+
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CreateBookScreen(navController: NavController) {
@@ -114,6 +124,17 @@ fun CreateBookScreen(navController: NavController) {
         bitmap?.let {
             val uri = Uri.parse(MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, null, null))
             bookImageUri = uri
+        }
+    }
+
+    // Camera permission request launcher
+    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch()
+        } else {
+            Toast.makeText(context, "You would need to accept the permission to use this feature", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -150,7 +171,8 @@ fun CreateBookScreen(navController: NavController) {
                 ImageBox(
                     bookImageUri = bookImageUri,
                     imagePickerLauncher = imagePickerLauncher,
-                    cameraLauncher = cameraLauncher
+                    cameraLauncher = cameraLauncher,
+                    requestCameraPermissionLauncher = requestCameraPermissionLauncher
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -247,7 +269,6 @@ fun CreateBookScreen(navController: NavController) {
                                         // Upload image
                                         uploadImage(inputStream, fileName)
 
-                                        // Get image URL
                                         // Get the next book ID
                                         val newBookId = (getBookId() as? Int) ?: 0
 
